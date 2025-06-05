@@ -20,11 +20,25 @@ class Blockchain : Block {
         std::unordered_map<std::string, User> users;
 
     public:
-        Blockchain(){
+        Blockchain(){}
 
-            // UTXO["ea950d1fc2ba8ad900e6940bab761412373344b8c87a50fbf7dd9444f8e0764d"] = 100;
+        void verify_tx(const Transaction& tx){
+            const vector<string> all_unspents = find_unspent(tx.get_receiver());
+            int total = 0;
+            int unspent_used = 0;
 
+            for(int i = 0; i < all_unspents.size(); i++){
+                total += utxo[all_unspents[i]];
+                unspent_used = i;
+                if(total >= tx.get_amount()) break;
+            }
+
+            for(const auto& elem: all_unspents) {
+                cout << "Deleting: " << elem << "\n";
+                utxo.erase(elem);
+            }
         }
+
 
 
         void add_utxo(const Transaction& tx) {
@@ -40,6 +54,7 @@ class Blockchain : Block {
             block_add_tx(tx);
             // std::cout <<  "Transaction Added! : " << tx.get_sender() << " to " << tx.get_receiver() << "\n" << tx.get_txid() << std::endl;
             users[tx.get_receiver()].inc_nonce();
+            verify_tx(tx);
             add_utxo(tx);
             
         }
@@ -66,15 +81,17 @@ class Blockchain : Block {
             }
         }
 
-        void find_unspent(const std::string& wal_addr){
+        vector<std::string> find_unspent(const std::string& wal_addr){
             int nonce = 0;
             std::string uhash;
-            bool found = false;
-            while(!found){
+            vector<std::string> unspents;
+            
+            for (const auto& pair : utxo) {
                 uhash = picosha2::hash256_hex_string(wal_addr + to_string(nonce));
-                if(utxo.find(uhash) != utxo.end()) found = true;
+                if(utxo.find(uhash) != utxo.end()) unspents.push_back(uhash);
                 nonce++;
             }
+            return unspents;
         }
 
 };

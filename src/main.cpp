@@ -16,11 +16,15 @@ int main(){
     Transaction tx1(sender, reciever1, 121);
     Transaction tx2(sender, reciever2, 212);
 
-
-
     blockchain.add_tx(tx);
     blockchain.add_tx(tx1);
     blockchain.add_tx(tx2);
+    blockchain.add_tx(tx2);
+    blockchain.add_tx(tx2);
+    blockchain.add_tx(tx2);
+    blockchain.add_tx(tx2);
+    blockchain.add_tx(tx2);
+
 
     blockchain.show_utxo();
 
