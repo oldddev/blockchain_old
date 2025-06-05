@@ -1,24 +1,41 @@
 #pragma once
 #include <string>
-#include <ctime>
+#include <string>
+#include <vector>
 #include "picosha2.h"
+#include <chrono>
 
 class Transaction{
 
     private:
-        const std::string from;
-        const std::string to;
-        const double amount;
-        std::string tx_hash;
+
+        std::string sender;
+        std::string receiver;
+        unsigned int amount;
+        std::string txid;
 
     public:
-        Transaction(const std::string& from, const std::string& to, double&& amount) 
-        : from(from), to(to), amount(amount){
-            time_t timestamp;
-            time(&timestamp);
-            tx_hash = picosha2::hash256_hex_string(from + to + std::to_string(amount) + std::to_string(timestamp));
+        Transaction(const std::string& sender, const std::string& receiver, unsigned int amount) :
+        sender(sender), receiver(receiver), amount(amount) {
+
+
+            auto now = std::chrono::high_resolution_clock::now();
+            auto micros = std::chrono::duration_cast<std::chrono::microseconds>(now.time_since_epoch()).count();
+
+            txid = picosha2::hash256_hex_string(sender + receiver + std::to_string(amount) + std::to_string(micros));
         }
-        std::string get_tx() const {
-            return tx_hash;
+
+        std::string get_txid() const {
+            return txid;
         }
+        std::string get_sender() const {
+            return sender;
+        }
+        std::string get_receiver() const {
+            return receiver;
+        }
+        unsigned int get_amount() const {
+            return amount;
+        }
+
 };
